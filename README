@@ -34,7 +34,7 @@
  
  /**
    * @foobar(arr=["a":true, "b":null, "c":false, "d:":3.14159265, 
-   *   "e":[1, 2, 3], "f":["a":[1, 2], b:[true, false]]
+   *   "e":[1, 2, 3], "f":["a":[1, 2], b:[true, false]]]
    * )
    */
  
