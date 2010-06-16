@@ -3,5 +3,62 @@
 
  ==============================================================================
 
- TODO
+ Introduction
+ ------------
+ Pia is a small API to emulate Java-like annotations in PHP.
+ 
+ Many PHP projects already use some sort of custom-built annotation mechanism, 
+ one of the most prominent examples being PHPUnit. Pia takes those approaches
+ one step further by implementing a full-fledged context-free grammar.
+ 
+ Basics
+ ------
+ Let's start with an example:
+ 
+ /**
+   * @my.awesome.annotation(
+   *   foo=" b a r ", 
+   *   bar=3.1
+   *   baz=["lorem", "ipsum"]
+   * )
+   */
+   function foo() {
+       // code
+   }
+  
+ As you can see Pia annotations may have parameters. The values for those
+ parameters can be strings, integers, floats, booleans and arrays (including
+ associative arrays).
+ 
+ Let's look at another example:
+ 
+ /**
+   * @foobar(arr=["a":true, "b":null, "c":false, "d:":3.14159265, 
+   *   "e":[1, 2, 3], "f":["a":[1, 2], b:[true, false]]
+   * )
+   */
+ 
+ It should be obvious that the array notation is borrowed from JSON and that
+ you can nest them as much as you like. The asterisk is ignored by the parser,
+ just like whitespace. That means you can do stuff like this:
+ 
+ /**
+   *************
+   * @foo(x=1, *
+   *      y=2, *
+   *      z=3) *
+   *************
+   */
+   
+ The parser also ignores anything before and after an annotation. However
+ once an @ is encountered it expects a well-formed annotation. 
+ Therefore the following can be parsed without problems:
+ 
+ /**
+   * lorem ipsum
+   * @annotation lorem
+   * ipsum @another.annotation lorem
+   * ipsum @and.another(foo="bar", bar=42) lorem
+   * ipsum
+   */
 
