@@ -10,19 +10,28 @@ class Registry implements \IteratorAggregate
 	function __construct(array $annotations = array()) {
 		$this->annotations = $annotations;
 	}
-	function getAnnotations($reflect) {
-		if (is_object($reflect)) {
-			if (!is_callable(array(&$reflect, 'getDocComment'))) {
+	function getAnnotations($element) {
+		if (is_object($element)) {
+			if (!is_callable(array(&$element, 'getDocComment'))) {
 				throw new \InvalidArgumentException();
 			}
-			$key = $this->getAnnotationKey($reflect);
+			$key = $this->getAnnotationKey($element);
 			if (!array_key_exists($key, $this->annotations)) {
-				$this->readAnnotations($reflect, $key);
+				$this->readAnnotations($element, $key);
 			}
 			return $this->annotations[$key];
 		}
+		else  if (is_string($element)) {
+			return @$this->annotations[$element];	
+		}
+		
+		return null;
 	}
-
+	
+	function hasAnnotations($element) {
+		return count($this->getAnnotations($element)) > 0;
+	}
+ 
 	function readAnnotations($reflect, $key = null) {
 		if ($key == null) {
 			$key = $this->getAnnotationKey($reflect);
@@ -50,5 +59,9 @@ class Registry implements \IteratorAggregate
 
 	function getIterator() {
 		return new \ArrayIterator($this->annotations);
+	}
+	
+	function load($file) {
+		$this->annotations = require $file;
 	}
 }
