@@ -17,7 +17,7 @@
 
 namespace pia;
 
-use pia\lexer\Lexer;
+use pia\lexer\TokenStream;
 use pia\lexer\Token;
 use pia\ParseException;
 use pia\Annotation;
@@ -26,7 +26,7 @@ class Parser
 {
 	private $lexer;
 
-	function __construct(Lexer $lexer) {
+	function __construct(TokenStream $lexer) {
 		$this->lexer = $lexer;
 	}
 
