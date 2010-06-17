@@ -7,8 +7,8 @@ use pia\lexer\Lexer;
 class Registry implements \IteratorAggregate
 {
 	private $annotations;
-	function __construct() {
-		$this->annotations = array();
+	function __construct(array $annotations = array()) {
+		$this->annotations = $annotations;
 	}
 	function getAnnotations($reflect) {
 		if (is_object($reflect)) {

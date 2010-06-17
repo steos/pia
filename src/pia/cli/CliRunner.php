@@ -122,12 +122,12 @@ class CliRunner
 			$processed->input = $files;
 		}
 		else if (is_file($args->input)) {
-			$processed->input[] = $args->input;
+			$processed->input[] = new \SplFileInfo($args->input);
 		}
 		else {
 			throw new UsageException("cannot read input file/directory \"$args->input\"");
 		}
-
+		
 		return $processed;
 	}
 
