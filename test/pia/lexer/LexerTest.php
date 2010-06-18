@@ -98,6 +98,26 @@ PHPDOC;
 		$this->assertNull($lexer->next());
 	}
 
+	function testMultibyteInput() {
+		$input = <<<PHPDOC
+/**
+  * @ö(ä="ü")
+  */
+PHPDOC;
+		$lexer = new Lexer($input);
+
+		$this->assertTokenType(Token::AT, $lexer->next());
+		$this->assertTokenType(Token::LITERAL, $lexer->next());
+		$this->assertEquals('ö', $lexer->peek()->getText());
+		$this->assertTokenType(Token::PAREN_L, $lexer->next());
+		$this->assertTokenType(Token::LITERAL, $lexer->next());
+		$this->assertEquals('ä', $lexer->peek()->getText());
+		$this->assertTokenType(Token::EQ, $lexer->next());
+		$this->assertTokenType(Token::STRING, $lexer->next());
+		$this->assertEquals('ü', $lexer->peek()->getText());
+		$this->assertTokenType(Token::PAREN_R, $lexer->next());
+	}
+
 	private function assertTokenType($expectedType, Token $tok) {
 		$this->assertEquals($expectedType, $tok->getType());
 	}

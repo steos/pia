@@ -244,4 +244,19 @@ PHPDOC;
 			'g' => array("lorem ipsum", "foo"),
 		), $annotations[1]->getParams());
 	}
+
+	function testParseMultibyteInput() {
+		$input = <<<PHPDOC
+/**
+  * @ö(ä="ü")
+  */
+PHPDOC;
+		$lexer = new Lexer($input);
+		$parser = new Parser(new Lexer($input));
+		$annotations = $parser->parse();
+		$this->assertEquals(1, count($annotations));
+		$this->assertTrue($annotations[0] instanceof Annotation);
+		$this->assertEquals('la.niñ', $annotations[0]->getName());
+		$this->assertEquals(array('niño' => 'öäü'), $annotations[0]->getParams());
+	}
 }
