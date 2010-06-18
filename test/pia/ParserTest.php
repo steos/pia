@@ -256,7 +256,7 @@ PHPDOC;
 		$annotations = $parser->parse();
 		$this->assertEquals(1, count($annotations));
 		$this->assertTrue($annotations[0] instanceof Annotation);
-		$this->assertEquals('la.niñ', $annotations[0]->getName());
-		$this->assertEquals(array('niño' => 'öäü'), $annotations[0]->getParams());
+		$this->assertEquals('ö', $annotations[0]->getName());
+		$this->assertEquals(array('ä' => 'ü'), $annotations[0]->getParams());
 	}
 }

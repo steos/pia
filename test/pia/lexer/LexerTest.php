@@ -107,14 +107,14 @@ PHPDOC;
 		$lexer = new Lexer($input);
 		$lexer->setMultibyteSafe(true);
 		$this->assertTokenType(Token::AT, $lexer->next());
-		$this->assertTokenType(Token::LITERAL, $lexer->next());
-		$this->assertEquals('ö', $lexer->peek()->getText());
+		$this->assertTokenType(Token::LITERAL, $lexer->peek());
+		$this->assertEquals('ö', $lexer->next()->getText());
 		$this->assertTokenType(Token::PAREN_L, $lexer->next());
-		$this->assertTokenType(Token::LITERAL, $lexer->next());
-		$this->assertEquals('ä', $lexer->peek()->getText());
+		$this->assertTokenType(Token::LITERAL, $lexer->peek());
+		$this->assertEquals('ä', $lexer->next()->getText());
 		$this->assertTokenType(Token::EQ, $lexer->next());
-		$this->assertTokenType(Token::STRING, $lexer->next());
-		$this->assertEquals('ü', $lexer->peek()->getText());
+		$this->assertTokenType(Token::STRING, $lexer->peek());
+		$this->assertEquals('ü', $lexer->next()->getText());
 		$this->assertTokenType(Token::PAREN_R, $lexer->next());
 	}
 
