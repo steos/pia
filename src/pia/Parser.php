@@ -27,7 +27,7 @@ class Parser
 	private $lexer;
 
 	function __construct(TokenStream $lexer) {
-		$this->lexer = $lexer;
+		$this->setLexer($lexer);
 	}
 
 	function parse() {
@@ -45,6 +45,14 @@ class Parser
 			}
 		}
 		return $annotations;
+	}
+
+	function getLexer() {
+		return $this->lexer;
+	}
+
+	function setLexer(TokenStream $lexer) {
+		$this->lexer = $lexer;
 	}
 
 	private function parseParameterList() {

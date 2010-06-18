@@ -259,4 +259,29 @@ PHPDOC;
 		$this->assertEquals('ö', $annotations[0]->getName());
 		$this->assertEquals(array('ä' => 'ü'), $annotations[0]->getParams());
 	}
+
+	function testReusability() {
+		$input1 = <<<PHPDOC
+/**
+  * @foo
+  */
+PHPDOC;
+
+		$input2 = <<<PHPDOC
+/**
+  * @bar
+  */
+PHPDOC;
+		$parser = new Parser(new Lexer($input1));
+
+		$an = $parser->parse();
+		$this->assertEquals(1, count($an));
+		$this->assertEquals('foo', $an[0]->getName());
+
+		$parser->setLexer(new Lexer($input2));
+		$an = $parser->parse();
+
+		$this->assertEquals(1, count($an));
+		$this->assertEquals('bar', $an[0]->getName());
+	}
 }

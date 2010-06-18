@@ -37,14 +37,22 @@ class Lexer implements TokenStream
 	private $charset;
 
 	function __construct($input) {
-		$this->input = explode("\n", trim($input, '*/'));
+		$this->setInput($input);
+		$this->multibyteSafe = false;
+		$this->charset = 'UTF-8';
+	}
+
+	function reset() {
 		$this->lineCount = count($this->input);
 		$this->line = 0;
 		$this->offset = 0;
 		$this->queue = array();
 		$this->state = self::STATE_DEFAULT;
-		$this->multibyteSafe = false;
-		$this->charset = 'UTF-8';
+	}
+
+	function setInput($input) {
+		$this->input = explode("\n", trim($input, '*/'));
+		$this->reset();
 	}
 
 	function setMultibyteSafe($multibyteSafe) {

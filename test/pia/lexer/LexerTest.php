@@ -118,6 +118,49 @@ PHPDOC;
 		$this->assertTokenType(Token::PAREN_R, $lexer->next());
 	}
 
+	function testReset() {
+		$input = <<<PHPDOC
+/**
+  * @foo
+  */
+PHPDOC;
+		$lexer = new Lexer($input);
+
+		$this->assertTokenType(Token::AT, $lexer->next());
+		$this->assertTokenType(Token::LITERAL, $lexer->peek());
+		$this->assertEquals('foo', $lexer->next()->getText());
+
+		$lexer->reset();
+
+		$this->assertTokenType(Token::AT, $lexer->next());
+		$this->assertTokenType(Token::LITERAL, $lexer->peek());
+		$this->assertEquals('foo', $lexer->next()->getText());
+	}
+
+	function testSetInput() {
+		$input = <<<PHPDOC
+/**
+  * @foo
+  */
+PHPDOC;
+		$input2 = <<<PHPDOC
+/**
+  * @bar
+  */
+PHPDOC;
+		$lexer = new Lexer($input);
+
+		$this->assertTokenType(Token::AT, $lexer->next());
+		$this->assertTokenType(Token::LITERAL, $lexer->peek());
+		$this->assertEquals('foo', $lexer->next()->getText());
+
+		$lexer->setInput($input2);
+
+		$this->assertTokenType(Token::AT, $lexer->next());
+		$this->assertTokenType(Token::LITERAL, $lexer->peek());
+		$this->assertEquals('bar', $lexer->next()->getText());
+	}
+
 	private function assertTokenType($expectedType, Token $tok) {
 		$this->assertEquals($expectedType, $tok->getType());
 	}
