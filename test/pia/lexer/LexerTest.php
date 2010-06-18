@@ -105,7 +105,7 @@ PHPDOC;
   */
 PHPDOC;
 		$lexer = new Lexer($input);
-
+		$lexer->setMultibyteSafe(true);
 		$this->assertTokenType(Token::AT, $lexer->next());
 		$this->assertTokenType(Token::LITERAL, $lexer->next());
 		$this->assertEquals('ö', $lexer->peek()->getText());

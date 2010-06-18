@@ -33,18 +33,29 @@ class Lexer implements TokenStream
 	private $size;
 	private $buffer;
 	private $lineCount;
+	private $multibyteSafe;
+	private $charset;
 
 	function __construct($input) {
-		$this->input = explode("\n", trim(str_replace("\r\n", "\n", $input), '*/'));
+		$this->input = explode("\n", trim($input, '*/'));
 		$this->lineCount = count($this->input);
 		$this->line = 0;
 		$this->offset = 0;
 		$this->queue = array();
 		$this->state = self::STATE_DEFAULT;
+		$this->multibyteSafe = false;
+		$this->charset = 'UTF-8';
+	}
 
-		foreach ($this->input as &$line) {
-			trim($line, '* ');
+	function setMultibyteSafe($multibyteSafe) {
+		if ($multibyteSafe && !extension_loaded('iconv')) {
+			throw new RuntimeException('multibyte safety requires iconv');
 		}
+		$this->multibyteSafe = $multibyteSafe;
+	}
+
+	function setCharset($charset) {
+		$this->charset = $charset;
 	}
 
 	function next() {
@@ -59,7 +70,13 @@ class Lexer implements TokenStream
 
 	private function populateQueue() {
 		while (empty($this->queue) && $this->line < $this->lineCount) {
-			$this->size = strlen($this->input[$this->line]);
+			if ($this->multibyteSafe) {
+				$this->size = iconv_strlen($this->input[$this->line],
+					$this->charset);
+			}
+			else {
+				$this->size = strlen($this->input[$this->line]);
+			}
 			$this->offset = 0;
 			$this->lex();
 			$this->line++;
@@ -90,7 +107,7 @@ class Lexer implements TokenStream
 
 	private function lexDefault()
 	{
-		$char = $this->input[$this->line][$this->offset];
+		$char = $this->nextChar();
 
 		// skip whitespace and the "*" character
 		if (ctype_space($char) || $char == '*') {
@@ -126,7 +143,7 @@ class Lexer implements TokenStream
 
 	private function lexString()
 	{
-		$char = $this->input[$this->line][$this->offset];
+		$char = $this->nextChar();
 
 		if ($char == '"') {
 			$this->state = self::STATE_DEFAULT;
@@ -138,9 +155,23 @@ class Lexer implements TokenStream
 		$this->buffer .= $char;
 	}
 
+	private function nextChar() {
+		if ($this->multibyteSafe) {
+			return iconv_substr($this->input[$this->line],
+				$this->offset, 1, $this->charset);
+		}
+		else {
+			return $this->input[$this->line][$this->offset];
+		}
+	}
+
 	private function pushBuffer($type = null, $offset = null)
 	{
-		if ($type == null && strlen($this->buffer) == 1) {
+		$bufferLength = $this->multibyteSafe ?
+			iconv_strlen($this->buffer, $this->charset) :
+			strlen($this->buffer);
+
+		if ($type == null && $bufferLength == 1) {
 			if (false === $type = Token::lookupType($this->buffer)) {
 				$type = $this->getBufferType();
 			}
@@ -154,7 +185,7 @@ class Lexer implements TokenStream
 		}
 
 		$token = new Token($type, $this->buffer,
-			$offset - strlen($this->buffer), $offset
+			$offset - $bufferLength, $offset
 		);
 
 		$this->queue[] = $token;
