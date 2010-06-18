@@ -4,8 +4,39 @@ namespace pia;
 
 require_once 'pia/Registry.php';
 
+/**
+ * @foo
+ * @pi(value=3.14)
+ */
+function annotatedMockup() {}
+
+function mockup() {}
+
 class RegistryTest extends \PHPUnit_Framework_TestCase
 {
+	function testTopLevelFunctionAnnotations() {
+		$reg = new Registry();
+		$func = new \ReflectionFunction('pia\annotatedMockup');
+		$an = $reg->getAnnotations($func);
+		$this->assertEquals(2, count($an));
+		$this->assertEquals('foo', $an[0]->getName());
+		$this->assertEquals('pi', $an[1]->getName());
+		$this->assertEquals(3.14, $an[1]->getParam('value'));
+	}
+
+	function testTopLevelFunctionAnnotations2() {
+		$reg = new Registry();
+		$func = new \ReflectionFunction('pia\mockup');
+		$this->assertFalse($reg->hasAnnotations($func));
+	}
+
+	function testGetFunctionAnnotationKey() {
+		$reg = new Registry();
+		$func = new \ReflectionFunction('pia\mockup');
+		$key = $reg->getAnnotationKey($func);
+		$this->assertEquals('#pia\mockup', $key);
+	}
+
 	/**
 	 * @annotated.property(foo="bar", pi=3.14, lorem=["ipsum", "dolor"])
 	 */

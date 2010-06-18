@@ -22,16 +22,16 @@ class Registry implements \IteratorAggregate
 			return $this->annotations[$key];
 		}
 		else  if (is_string($element)) {
-			return @$this->annotations[$element];	
+			return @$this->annotations[$element];
 		}
-		
+
 		return null;
 	}
-	
+
 	function hasAnnotations($element) {
 		return count($this->getAnnotations($element)) > 0;
 	}
- 
+
 	function readAnnotations($reflect, $key = null) {
 		if ($key == null) {
 			$key = $this->getAnnotationKey($reflect);
@@ -52,6 +52,9 @@ class Registry implements \IteratorAggregate
 			return $ref->getDeclaringClass()->getName() .
 				'::$' . $ref->getName();
 		}
+		else if ($ref instanceof \ReflectionFunction) {
+			return '#' . $ref->getName();
+		}
 		else {
 			throw new \InvalidArgumentException();
 		}
@@ -60,7 +63,7 @@ class Registry implements \IteratorAggregate
 	function getIterator() {
 		return new \ArrayIterator($this->annotations);
 	}
-	
+
 	function load($file) {
 		$this->annotations = require $file;
 	}
