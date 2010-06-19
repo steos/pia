@@ -284,4 +284,28 @@ PHPDOC;
 		$this->assertEquals(1, count($an));
 		$this->assertEquals('bar', $an[0]->getName());
 	}
+
+	function testLazyStrings() {
+		$input = <<<PHPDOC
+/**
+  * @foo(bar=baz)
+  * @bar(baz=[lorem:ipsum])
+  * @look(ma=even-hyphens.dots#and+lots~of;other|stuff)
+  */
+PHPDOC;
+		$parser = new Parser(new Lexer($input));
+		$an = $parser->parse();
+		$this->assertEquals(3, count($an));
+		$this->assertEquals('foo', $an[0]->getName());
+		$this->assertTrue($an[0]->hasParam('bar'));
+		$this->assertEquals('baz', $an[0]->getParam('bar'));
+
+		$this->assertEquals('bar', $an[1]->getName());
+		$this->assertEquals(array('baz' => array('lorem' => 'ipsum')),
+			$an[1]->getParams());
+
+		$this->assertEquals('look', $an[2]->getName());
+		$this->assertEquals('even-hyphens.dots#and+lots~of;other|stuff',
+			$an[2]->getParam('ma'));
+	}
 }
