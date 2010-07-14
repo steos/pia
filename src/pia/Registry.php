@@ -7,9 +7,22 @@ use pia\lexer\Lexer;
 class Registry implements \IteratorAggregate
 {
 	private $annotations;
+	private $reverseIndexEnabled;
+	private $reverseIndex;
 	function __construct(array $annotations = array()) {
 		$this->annotations = $annotations;
+		$this->reverseIndexEnabled = false;
+		$this->reverseIndex = array();
 	}
+
+	function setReverseIndexEnabled($reverseIndexEnabled) {
+		$this->reverseIndexEnabled = $reverseIndexEnabled;
+	}
+
+	function isReverseIndexEnabled() {
+		return $this->reverseIndexEnabled;
+	}
+
 	function getAnnotations($element) {
 		if (is_object($element)) {
 			if (!is_callable(array(&$element, 'getDocComment'))) {
@@ -37,7 +50,51 @@ class Registry implements \IteratorAggregate
 			$key = $this->getAnnotationKey($reflect);
 		}
 		$parser = new Parser(new Lexer($reflect->getDocComment()));
-		$this->annotations[$key] = $parser->parse();
+		$annotations = $parser->parse();
+		if ($this->reverseIndexEnabled) {
+			foreach ($annotations as &$annotation) {
+				$this->reverseIndex[$annotation->getName()][] = $reflect;
+			}
+		}
+		$this->annotations[$key] = $annotations;
+	}
+
+	function find($annotationName) {
+		if ($this->reverseIndexEnabled) {
+			return @$this->reverseIndex[$annotationName];
+		}
+		else {
+			$reflections = array();
+			foreach ($this->annotations as $key => &$annotations) {
+				foreach ($annotations as &$annotation) {
+					if ($annotation->getName() != $annotationName) {
+						continue;
+					}
+					$reflections[] = $this->getReflectionFromKey($key);
+				}
+			}
+			return $reflections;
+		}
+	}
+
+	function getReflectionFromKey($key) {
+		// property
+		if (substr_count($key, '::$')) {
+			list($class, $property) = explode('::$', $key, 2);
+			return new \ReflectionProperty($class, $property);
+		}
+		// method
+		else if (substr_count($key, '::')) {
+			list($class, $method) = explode('::', $key, 2);
+			return new \ReflectionMethod($class, $method);
+		}
+		// function
+		else if ($key[0] == '#') {
+			return new \ReflectionFunction(substr($key, 1));
+		}
+		else {
+			return new \ReflectionClass($key);
+		}
 	}
 
 	function getAnnotationKey($ref) {

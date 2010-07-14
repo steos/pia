@@ -172,4 +172,80 @@ class RegistryTest extends \PHPUnit_Framework_TestCase
 		$this->assertFalse($reg->hasAnnotations(
 			$class->getMethod('testHasAnnotations')));
 	}
+
+	/**
+	 * @foo
+	 * @bar
+	 */
+	private $testFindProp1;
+
+	/**
+	 * @foo
+	 */
+	private $testFindProp2;
+
+	/**
+	 * @foo
+	 * @baz
+	 */
+	function testFind() {
+		$reg = new Registry();
+		$class = new \ReflectionClass('pia\RegistryTest');
+		$reg->readAnnotations(new \ReflectionProperty('pia\RegistryTest', 'testFindProp1'));
+		$reg->readAnnotations(new \ReflectionProperty('pia\RegistryTest', 'testFindProp2'));
+		$reg->readAnnotations(new \ReflectionMethod('pia\RegistryTest', 'testFind'));
+		$reg->readAnnotations(new \ReflectionFunction('pia\annotatedMockup'));
+
+		$an = $reg->find('foo');
+		$this->assertEquals(4, count($an));
+		$this->assertTrue($an[0]instanceof \ReflectionProperty);
+		$this->assertEquals('testFindProp1', $an[0]->getName());
+		$this->assertTrue($an[1]instanceof \ReflectionProperty);
+		$this->assertEquals('testFindProp2', $an[1]->getName());
+		$this->assertTrue($an[2]instanceof \ReflectionMethod);
+		$this->assertEquals('testFind', $an[2]->getName());
+		$this->assertTrue($an[3]instanceof \ReflectionFunction);
+		$this->assertEquals('pia\annotatedMockup', $an[3]->getName());
+
+		$an = $reg->find('bar');
+		$this->assertEquals(1, count($an));
+		$this->assertTrue($an[0] instanceof \ReflectionProperty);
+		$this->assertEquals('testFindProp1', $an[0]->getName());
+
+		$an = $reg->find('baz');
+		$this->assertEquals(1, count($an));
+		$this->assertTrue($an[0] instanceof \ReflectionMethod);
+		$this->assertEquals('testFind', $an[0]->getName());
+	}
+
+	function testFindWithReverseIndex() {
+		$reg = new Registry();
+		$reg->setReverseIndexEnabled(true);
+		$class = new \ReflectionClass('pia\RegistryTest');
+		$reg->readAnnotations(new \ReflectionProperty('pia\RegistryTest', 'testFindProp1'));
+		$reg->readAnnotations(new \ReflectionProperty('pia\RegistryTest', 'testFindProp2'));
+		$reg->readAnnotations(new \ReflectionMethod('pia\RegistryTest', 'testFind'));
+		$reg->readAnnotations(new \ReflectionFunction('pia\annotatedMockup'));
+
+		$an = $reg->find('foo');
+		$this->assertEquals(4, count($an));
+		$this->assertTrue($an[0]instanceof \ReflectionProperty);
+		$this->assertEquals('testFindProp1', $an[0]->getName());
+		$this->assertTrue($an[1]instanceof \ReflectionProperty);
+		$this->assertEquals('testFindProp2', $an[1]->getName());
+		$this->assertTrue($an[2]instanceof \ReflectionMethod);
+		$this->assertEquals('testFind', $an[2]->getName());
+		$this->assertTrue($an[3]instanceof \ReflectionFunction);
+		$this->assertEquals('pia\annotatedMockup', $an[3]->getName());
+
+		$an = $reg->find('bar');
+		$this->assertEquals(1, count($an));
+		$this->assertTrue($an[0] instanceof \ReflectionProperty);
+		$this->assertEquals('testFindProp1', $an[0]->getName());
+
+		$an = $reg->find('baz');
+		$this->assertEquals(1, count($an));
+		$this->assertTrue($an[0] instanceof \ReflectionMethod);
+		$this->assertEquals('testFind', $an[0]->getName());
+	}
 }
