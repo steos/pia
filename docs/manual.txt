@@ -17,9 +17,9 @@ Let's start with an example:
 <?php
 /**
   * @my.awesome.annotation(
-  *   foo=&quot; b a r &quot;, 
+  *   foo=" b a r ", 
   *   bar=3.1
-  *   baz=[&quot;lorem&quot;, &quot;ipsum&quot;]
+  *   baz=["lorem", "ipsum"]
   * )
   */
   function foo() {
