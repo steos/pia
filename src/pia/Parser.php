@@ -21,14 +21,35 @@ use pia\lexer\Token;
 use pia\ParseException;
 use pia\Annotation;
 
+/**
+ * This is the pia parser implementation.
+ *
+ * This class encodes the grammar of the pia annotation syntax. It's a
+ * straight-forward top-down recursive descent implementation. It depends
+ * on a TokenStream implementation.
+ *
+ * @see TokenStream
+ */
 class Parser
 {
 	private $lexer;
 
+	/**
+	 * creates a new parser with the given token stream
+	 *
+	 * @param TokenStream $lexer the token stream input
+	 */
 	function __construct(TokenStream $lexer) {
 		$this->setLexer($lexer);
 	}
 
+	/**
+	 * parses the token stream and returns the resulting annotations
+	 *
+	 * @throws ParseException if the parser fails for some reason
+	 *
+	 * @return array the parsed annotation instances
+	 */
 	function parse() {
 		$annotations = array();
 		while ($token = $this->lexer->next()) {
@@ -46,10 +67,23 @@ class Parser
 		return $annotations;
 	}
 
+	/**
+	 * retrieves the underlying token stream
+	 *
+	 * @return TokenStream the token stream instance used by this parser
+	 */
 	function getLexer() {
 		return $this->lexer;
 	}
 
+	/**
+	 * sets the token stream instance of this parser
+	 *
+	 * This function can be used to reuse a parser instance by supplying
+	 * a new token stream instance.
+	 *
+	 * @param TokenStream $lexer the token stream instance
+	 */
 	function setLexer(TokenStream $lexer) {
 		$this->lexer = $lexer;
 	}

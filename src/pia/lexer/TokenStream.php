@@ -16,6 +16,14 @@
 
 namespace pia\lexer;
 
+/**
+ * TokenStream interface for the pia lexer.
+ *
+ * This interface defines the methods that a lexer implementation
+ * must implement.
+ *
+ * @see Token
+ */
 interface TokenStream
 {
 	/**

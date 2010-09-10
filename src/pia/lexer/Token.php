@@ -16,6 +16,9 @@
 
 namespace pia\lexer;
 
+/**
+ * This class represents a lexer token.
+ */
 class Token
 {
 	// symbols

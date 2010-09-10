@@ -19,6 +19,17 @@ namespace pia\lexer;
 use pia\lexer\Token;
 use pia\lexer\TokenStream;
 
+/**
+ * Lexer implementation for the pia annotation parser.
+ *
+ * Example usage:
+ * $lexer = new Lexer($input);
+ * while ($tok = $lexer->next()) {
+ *     // do something with $tok
+ * }
+ *
+ * @see TokenStream
+ */
 class Lexer implements TokenStream
 {
 	const STATE_DEFAULT = 1;
@@ -35,12 +46,24 @@ class Lexer implements TokenStream
 	private $multibyteSafe;
 	private $charset;
 
+	/**
+	 * creates a new lexer instance for the given input
+	 *
+	 * By default multibyte safety is disabled. The default charset is UTF-8
+	 * which will be used if you enable multibyte safety.
+	 */
 	function __construct($input) {
 		$this->setInput($input);
 		$this->multibyteSafe = false;
 		$this->charset = 'UTF-8';
 	}
 
+	/**
+	 * resets the lexer state
+	 *
+	 * This function completely resets the lexer so you can restart the
+	 * lexing process, possibly with different input.
+	 */
 	function reset() {
 		$this->lineCount = count($this->input);
 		$this->line = 0;
@@ -49,11 +72,24 @@ class Lexer implements TokenStream
 		$this->state = self::STATE_DEFAULT;
 	}
 
+	/**
+	 * sets a new input
+	 *
+	 * This function also resets the lexer state.
+	 */
 	function setInput($input) {
 		$this->input = explode("\n", trim($input, '*/'));
 		$this->reset();
 	}
 
+	/**
+	 * enables multibytes safety
+	 *
+	 * If multibyte safety is enabled iconv string functions will be used
+	 * instead of the default implementation.
+	 *
+	 * @param boolean $multibyteSafe whether to enable multibyte safety
+	 */
 	function setMultibyteSafe($multibyteSafe) {
 		if ($multibyteSafe && !extension_loaded('iconv')) {
 			throw new RuntimeException('multibyte safety requires iconv');
@@ -61,15 +97,36 @@ class Lexer implements TokenStream
 		$this->multibyteSafe = $multibyteSafe;
 	}
 
+	/**
+	 * sets the charset for multibytes safety
+	 *
+	 * By default the charset is set to UTF-8.
+	 *
+	 * @param string $charset The charset to use with iconv functions
+	 */
 	function setCharset($charset) {
 		$this->charset = $charset;
 	}
 
+	/**
+	 * advances to the next token and returns it
+	 *
+	 * @see TokenStream::next()
+	 *
+	 * @return Token|null the token instance or null if there are no more tokens
+	 */
 	function next() {
 		$this->populateQueue();
 		return array_shift($this->queue);
 	}
 
+	/**
+	 * retrieves the current token instance
+	 *
+	 * @see TokenStream::peek()
+	 *
+	 * @return Token|false the current token or false if there are no more tokens
+	 */
 	function peek() {
 		$this->populateQueue();
 		return reset($this->queue);

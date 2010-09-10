@@ -16,32 +16,74 @@
 
 namespace pia;
 
+/**
+ * This class represents an annotation.
+ *
+ * An annotation has a name and optionally named parameters. It can also be
+ * serialized into a PHP code string which is used by the CLI tool to generate
+ * the annotation lookup array.
+ */
 class Annotation
 {
 	private $name;
 	private $params;
 
+	/**
+	 * creates a new annotation with the given name and parameters
+	 *
+	 * @param string $name the annotation name
+	 * @param array $params the parameter map
+	 */
 	function __construct($name, array $params = array()) {
 		$this->name = $name;
 		$this->params = $params;
 	}
 
+	/**
+	 * retrieves the name of this annotation
+	 *
+	 * @return string the annotation name
+	 */
 	function getName() {
 		return $this->name;
 	}
 
+	/**
+	 * retrieves the parameter map of this annotation
+	 *
+	 * @return array the parameter map
+	 */
 	function getParams() {
 		return $this->params;
 	}
 
+	/**
+	 * determines whether this annotation has a parameter with the given name
+	 *
+	 * @param string $name the parameter name
+	 *
+	 * @return bool true if the parameter exists, false if not
+	 */
 	function hasParam($name) {
 		return array_key_exists($name, $this->params);
 	}
 
+	/**
+	 * retrieves the parameter with the given name
+	 *
+	 * @param string $name the parameter name
+	 *
+	 * @return mixed the parameter value or null if it doesn't exist
+	 */
 	function getParam($name) {
 		return @$this->params[$name];
 	}
 
+	/**
+	 * serializes this annotation into a valid PHP code snippet
+	 *
+	 * @returns string the PHP code snippet representing this annotation
+	 */
 	function toPhpString() {
 		$params = var_export($this->params, true);
 		return "new \pia\Annotation('$this->name', $params)";
