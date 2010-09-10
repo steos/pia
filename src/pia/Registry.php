@@ -23,10 +23,30 @@ class Registry implements \IteratorAggregate
 	private $annotations;
 	private $reverseIndexEnabled;
 	private $reverseIndex;
+	private $multibyteSafe;
+	private $charset;
 	function __construct(array $annotations = array()) {
 		$this->annotations = $annotations;
 		$this->reverseIndexEnabled = false;
 		$this->reverseIndex = array();
+		$this->multibyteSafe = false;
+		$this->charset = 'UTF-8';
+	}
+
+	function setMultibyteSafe($multibyteSafe) {
+		$this->multibyteSafe = true;
+	}
+
+	function setCharset($charset) {
+		$this->charset = $charset;
+	}
+
+	function getCharset() {
+		return $this->charset;
+	}
+
+	function isMultibyteSafe() {
+		return $this->multibyteSafe;
 	}
 
 	function setReverseIndexEnabled($reverseIndexEnabled) {
@@ -63,7 +83,10 @@ class Registry implements \IteratorAggregate
 		if ($key == null) {
 			$key = $this->getAnnotationKey($reflect);
 		}
-		$parser = new Parser(new Lexer($reflect->getDocComment()));
+		$lexer = new Lexer($reflect->getDocComment());
+		$lexer->setMultibyteSafe($this->multibyteSafe);
+		$lexer->setCharset($this->charset);
+		$parser = new Parser($lexer);
 		$annotations = $parser->parse();
 		if ($this->reverseIndexEnabled) {
 			foreach ($annotations as &$annotation) {

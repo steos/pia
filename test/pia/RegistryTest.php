@@ -262,4 +262,17 @@ class RegistryTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($an[0] instanceof \ReflectionMethod);
 		$this->assertEquals('testFind', $an[0]->getName());
 	}
+
+	/**
+	 * @ä(ö="ü")
+	 */
+	function testMultibyteSafety() {
+		$reg = new Registry;
+		$method = new \ReflectionMethod('pia\RegistryTest', 'testMultibyteSafety');
+		$an = $reg->getAnnotations($method);
+		$this->assertEquals(1, count($an));
+		$this->assertEquals('ä', $an[0]->getName());
+		$this->assertTrue($an[0]->hasParam('ö'));
+		$this->assertEquals('ü', $an[0]->getParam('ö'));
+	}
 }
