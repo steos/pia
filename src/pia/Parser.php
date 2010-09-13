@@ -88,6 +88,10 @@ class Parser
 		$this->lexer = $lexer;
 	}
 
+	/*
+	 * parses a parameter list
+	 * param-list := <param>? ( ',' <param> )*
+	 */
 	private function parseParameterList() {
 		$params = array();
 		$token = $this->expect(Token::LITERAL, Token::PAREN_R);
@@ -102,6 +106,10 @@ class Parser
 		return $params;
 	}
 
+	/*
+	 * parses an annotation parameter
+	 * param := <string> '=' <expr>
+	 */
 	private function parseParameter(Token $nameToken = null) {
 		if ($nameToken == null) {
 			$nameToken = $this->expect(Token::LITERAL);
@@ -111,6 +119,9 @@ class Parser
 		return array($nameToken->getText(), $value);
 	}
 
+	/*
+	 * parses a literal value
+	 */
 	private function parseLiteral(Token $token = null) {
 		if ($token == null) {
 			$token = $this->expect(Token::NUMERIC,
@@ -134,6 +145,10 @@ class Parser
 		}
 	}
 
+	/*
+	 * parses an expression (either a literal or an array)
+	 * expr := <array> | <literal>
+	 */
 	private function parseExpression(Token $token = null) {
 		if ($token == null) {
 			$token = $this->expect(
@@ -152,6 +167,7 @@ class Parser
 	}
 
 	/*
+	 * parses an array
 	 * array := '[' ( <array-element>? ( ',' <array-element> )* )? ']'
 	 */
 	private function parseArray() {
@@ -181,6 +197,7 @@ class Parser
 	}
 
 	/*
+	 * parses an array element
 	 * array-element := <expr> | ( <string> ':' <expr> )
 	 */
 	private function parseArrayElement(Token $token) {
@@ -201,6 +218,12 @@ class Parser
 		return array($key, $value);
 	}
 
+	/*
+	 * retrieves the next token
+	 * takes an arbitrary number of arguments which should be token types
+	 * and verifies that the next token is one of the specified types
+	 * otherwise a ParseException is thrown
+	 */
 	private function expect() {
 		$expectedTypes = func_get_args();
 		$token = $this->lexer->next();
@@ -216,6 +239,10 @@ class Parser
 		return $token;
 	}
 
+	/*
+	 * retrieves either the next token or throws a
+	 * ParseException if there are no more tokens
+	 */
 	private function nextNotNull() {
 		$next = $this->lexer->next();
 		if ($next == null) {
@@ -224,6 +251,9 @@ class Parser
 		return $next;
 	}
 
+	/*
+	 * builds a string list of token types
+	 */
 	private function buildTokenTypeStringList($types) {
 		$list = array();
 		foreach ($types as $type) {
