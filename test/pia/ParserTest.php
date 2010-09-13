@@ -307,4 +307,56 @@ PHPDOC;
 		$this->assertEquals('even-hyphens.dots#and+lots~of;other|stuff',
 			$an[2]->getParam('ma'));
 	}
+
+	/**
+	 * @expectedException pia\ParseException
+	 */
+	function testInvalidArrayKeyError() {
+		$input = <<<PHPDOC
+/**
+  * @foo(bar=[[1,2]:"baz"])
+  */
+PHPDOC;
+		$parser = new Parser(new Lexer($input));
+		$parser->parse();
+	}
+
+	/**
+	 * @expectedException pia\ParseException
+	 */
+	function testUnexpectedEofError() {
+		$input = <<<PHPDOC
+/**
+  * @foo(bar=["foo":)
+  */
+PHPDOC;
+		$parser = new Parser(new Lexer($input));
+		$parser->parse();
+	}
+
+	/**
+	 * @expectedException pia\ParseException
+	 */
+	function testUnexpectedEofError2() {
+		$input = <<<PHPDOC
+/**
+  * @foo(bar=[
+  */
+PHPDOC;
+		$parser = new Parser(new Lexer($input));
+		$parser->parse();
+	}
+
+	/**
+	 * @expectedException pia\ParseException
+	 */
+	function testMalformedArrayError() {
+		$input = <<<PHPDOC
+/**
+  * @foo(bar=["foo" "bar"])
+  */
+PHPDOC;
+		$parser = new Parser(new Lexer($input));
+		$parser->parse();
+	}
 }
