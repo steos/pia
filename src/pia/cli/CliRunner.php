@@ -85,12 +85,34 @@ class CliRunner
 	}
 
 	static function parseArgs($argc, $argv) {
-		if ($argc != 3) {
-			throw new UsageException(self::getUsage());
-		}
 		$args = new \stdClass;
-		$args->input = $argv[1];
-		$args->output = $argv[2];
+		$args->opt = array('d' => array(), 'autoload' => false);
+		$remaining = array();
+		for ($i = 1; $i < $argc; ++$i) {
+			$arg = $argv[$i];
+			switch ($arg) {
+				case '-d':
+					if ($i + 1 == $argc) {
+						throw new UsageException(
+							"missing value for argument \"$arg\"");
+					}
+					list($setting, $value) = explode('=', $argv[++$i]);
+					$args->opt['d'][$setting] = $value;
+					break;
+				case '--autoload':
+				case '-a':
+					$args->opt['autoload'] = true;
+					break;
+				default:
+					$remaining[] = $arg;
+			}
+		}
+
+		if (count($remaining) < 2) {
+			throw new UsageException("missing input and output arguments");
+		}
+
+		list($args->input, $args->output) = $remaining;
 		return $args;
 	}
 
@@ -100,6 +122,7 @@ class CliRunner
 		// to php types
 		$processed = new \stdClass;
 		$processed->output = null;
+		$processed->opt = $args->opt;
 		// validate output
 		if ($args->output == '-') {
 			// we allow "-" to specify stdout as output
@@ -133,6 +156,14 @@ class CliRunner
 	static function main($argc, $argv) {
 		try {
 			$args = self::validateArgs(self::parseArgs($argc, $argv));
+			if ($args->opt['autoload']) {
+				spl_autoload_register();
+			}
+			foreach ($args->opt['d'] as $setting => $value) {
+				ini_set($setting, $value);
+			}
+			set_include_path(get_include_path() . PATH_SEPARATOR .
+				dirname(__FILE__) . '/../..');
 			$runner = new self($args->output);
 			foreach ($args->input as $file) {
 				$runner->addSourceFile($file->getRealPath());
@@ -144,6 +175,7 @@ class CliRunner
 		// TODO optional stacktrace
 		catch (UsageException $e) {
 			echo 'Usage Error: ', $e->getMessage(), PHP_EOL;
+			echo PHP_EOL, self::getUsage();
 			exit(1);
 		}
 		catch (Exception $e) {
@@ -155,11 +187,16 @@ class CliRunner
 	static function getUsage() {
 		return <<<USAGE
 SYNOPSIS
- pia <INPUT> <OUTPUT>
+pia [OPTIONS] <INPUT> <OUTPUT>
 
 Examples
- pia annotated.php annotations.php
- pia my-source-folder -
+pia annotated.php annotations.php
+pia my-source-folder -
+pia -d include_path=src --autoload source/folder output.php
+
+OPTIONS
+-d <setting>=<value>  set a php ini setting, e.g. include_path=source/folder
+-a --autoload         enable the autoloader
 
 USAGE;
 	}
